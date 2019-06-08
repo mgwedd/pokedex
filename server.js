@@ -1,8 +1,9 @@
-require('dotenv').config()
+require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
 const POKEDEX = require('./pokedex.json');
 const cors = require('cors');
+const helmet = require('helmet');
 const app = express();
 const PORT = 8000;
 
@@ -10,7 +11,8 @@ validateBearerToken = ( req, res, next ) => {
     const apiToken = process.env.API_TOKEN;
     const authToken = req.get('Authorization');
     if ( !authToken || apiToken !== authToken.split(' ')[1] ) {
-        return res.status(401).json({ error: 'Unauthorized request. Check your API Token.' })
+        console.log('your auth token: ', authToken)
+        return res.status(401).json({ error: 'Unauthorized request. Check your API Token.' });
     }
     // move to the next middlewear since the auth token passes.
     next();
@@ -19,8 +21,8 @@ validateBearerToken = ( req, res, next ) => {
 // PREPROCESSING MIDDLEWEAR
 app.use( validateBearerToken );
 app.use(morgan('dev'));
-app.options('*', cors())
 app.use(cors());
+app.use(helmet());
 
 // GET /TYPES ENDPOINT
 handleGetTypes = ( req, res ) => {
