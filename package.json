@@ -10,7 +10,10 @@
     "test": "mocha"
   },
   "keywords": [],
-  "author": "",
+  "engines": {
+    "node": "10.15.3"
+  },
+  "author": "Michael Wedd",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",

@@ -5,7 +5,6 @@ const POKEDEX = require('./pokedex.json');
 const cors = require('cors');
 const helmet = require('helmet');
 const app = express();
-const PORT = 8000;
 
 validateBearerToken = ( req, res, next ) => {
     const apiToken = process.env.API_TOKEN;
@@ -18,11 +17,23 @@ validateBearerToken = ( req, res, next ) => {
     next();
 }
 
-// PREPROCESSING MIDDLEWEAR
+// Preprocessing middlewear and server config
+const morganSetting = process.env.NODE_ENV === 'production' ? 'tiny' : 'common';
 app.use( validateBearerToken );
-app.use(morgan('dev'));
+app.use(morgan( morganSetting ));
 app.use(cors());
 app.use(helmet());
+app.use((error, req, res, next) => {
+    let response
+    if (process.env.NODE_ENV === 'production') {
+      response = { error: { message: 'Server error' }}
+    } else {
+      response = { error }
+    }
+    res.status( 500 ).json( response )
+});
+const PORT = process.env.PORT || 8000; // using env var PORT that cloud providers like Heroku will set. 8000 as local fallback.
+app.listen( PORT );
 
 // GET /TYPES ENDPOINT
 handleGetTypes = ( req, res ) => {
@@ -50,8 +61,3 @@ handleGetPokemon = ( req, res ) => {
     res.json( results );
 }
 app.get( '/pokemon', handleGetPokemon );
-// ===================
-
-app.listen(PORT, () => {
-    console.log(`Server initialized and listening on htttp://localhost:${ PORT }`);
-});
